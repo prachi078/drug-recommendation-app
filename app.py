@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import re
 import nltk
+import os
+import gdown
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -10,9 +12,24 @@ from sklearn.metrics.pairwise import cosine_similarity
 nltk.download('stopwords')
 nltk.download('punkt')
 
+# Google Drive file IDs
+CSV_FILE_ID = '1fg2Gt1RetHFk8wi6eEdhlOme-MR7AgaP'
+NPY_FILE_ID = '1vRwABVNQmDYcII0XrTpJLwmLI0xSa26N'
+
+# Function to download files from Google Drive
+def download_file_from_google_drive(file_id, destination):
+    url = f'https://drive.google.com/uc?id={file_id}'
+    gdown.download(url, destination, quiet=False)
+
 # Load data and model
 @st.cache_resource
 def load_resources():
+    # Download files if they don't exist
+    if not os.path.exists('processed_data.csv'):
+        download_file_from_google_drive(CSV_FILE_ID, 'processed_data.csv')
+    if not os.path.exists('sentence_embeddings.npy'):
+        download_file_from_google_drive(NPY_FILE_ID, 'sentence_embeddings.npy')
+    
     df = pd.read_csv('processed_data.csv')
     embeddings = np.load('sentence_embeddings.npy')
     model = SentenceTransformer('all-MiniLM-L6-v2')
